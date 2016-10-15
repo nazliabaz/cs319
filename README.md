@@ -12,10 +12,5 @@
 
 
 # Project Description
-Our project is a game that is inspired by Flappy Bird developed by Dong Nguyen.
-However, our game will be a PC game rather than an android game. Also, rather than controlling
-the bird via keyboard or mouse, the bird will move through a straight line with a steady velocity.
-The user will have to solve the mathematical questions written on the columns to open a path for
-the bird to move through the game. The upper half of a column will go upside if the answer is
-correct. If the columns are closed when the bird reaches them, the game ends. After the
-mathematical questions will get harder for every five columns the bird passes through.
+Break It! is a fun and entertaining game that any person of any age can easily play. The game will be developed with Java. The main purpose of the game is to move the bird through columns and enemies to safely reach its nest. Even though, it may seem similar to other popular games, Break It! combines lots of different features to make it more fun and a challenging experience for the player. 
+The player will move the bird forward and backwards to escape the enemy and shoots the columns to create a pathway to move forward. Passing each column will enable the player to play the next level. The game will be a desktop application and will be controlled with the keyboard.
