@@ -1,5 +1,8 @@
 # Cs319
 
+![Break It!](https://github.com/nazliabaz/cs319/blob/master/logo.jpg)
+
+
 <b> Group 11 Members: </b>
 <ul>
 <li>Usama Moin</li>
