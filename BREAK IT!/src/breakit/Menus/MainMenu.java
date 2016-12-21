@@ -39,6 +39,15 @@ public class MainMenu extends JPanel  {
     public String selectCurrentOption(){
         return "";
     }
+    
+    public void nextSlide(){
+        
+    }
+    
+     public void previousSlide(){
+        
+    }
+
 
     
 }
