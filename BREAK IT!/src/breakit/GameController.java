@@ -18,6 +18,10 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.Timer;
 
@@ -46,6 +50,8 @@ public class GameController implements ActionListener {
     private boolean mHairYellow=true;
     protected final Image abraham=Toolkit.getDefaultToolkit().getImage("abraham.png");
     protected final Image returnToMenu=Toolkit.getDefaultToolkit().getImage("return.png");
+    protected final Image bullet=Toolkit.getDefaultToolkit().getImage("smallBullet.png");
+    protected final Image cat=Toolkit.getDefaultToolkit().getImage("cat.png");
     
     public int totalLife=200;
     public int remainingLife=200;
@@ -88,18 +94,44 @@ public class GameController implements ActionListener {
 
             g.drawImage(backgroud, 0, 0, WIDTH, HEIGHT, gPanel);
             if(mapManager.shouldGameStop()==false){
-                int playerX=mapManager.returnPlayerX()/2;
-                int playerY=mapManager.returnPlayerY()/2-30;
+
+                
+                
+                
+                int bulletX=mapManager.returnBulletX();
+                int bulletY=mapManager.returnBulletY();
+                //System.out.println(bulletX+"   "+bulletY+" Player X position="+playerX);
+                if(bulletX!=0){
+                    g.drawImage(bullet, bulletX, bulletY,20,10, gPanel);
+                }
+                
+                //System.out.println("bullet x= "+bulletX);
+                
+                
+                
+                int playerX=mapManager.returnPlayerX();
+                int playerY=mapManager.returnPlayerY()-30;
                 g.drawImage(margaret, playerX, playerY, 60, 60, gPanel);
 
 
-                int columnX=mapManager.returnColumnX()/2;
+                int columnX=mapManager.returnColumnX();
                 //System.out.println("COlumnx="+columnX);
-                if(columnX!=-2){
+                if(columnX!=-5){
                     g.setColor(Color.red.darker().darker().darker());
                     g.fillRect(columnX-10, 0, 40, 600);                
 
                 }
+                
+                int enemy1X=mapManager.returnEnemy1X();
+                int enemy1Y=mapManager.returnEnemy1Y();
+                
+                if(enemy1X!=0){
+                    g.drawImage(cat, enemy1X, enemy1Y,70,30, gPanel);
+                }
+                
+                
+
+                
 
 
 
@@ -324,17 +356,35 @@ public class GameController implements ActionListener {
         else{
             
             //System.out.println("else Part called");
-            if(pressedKeys[3]==true){
+            if(pressedKeys[0]==true){
+                mapManager.playerMoveUp();
+                inpManager.keyHandled(0);
+            }
+            else if(pressedKeys[1]==true){
+                mapManager.playerMoveDown();
+                inpManager.keyHandled(1);
+            }
+         /*   else if(pressedKeys[3]==true){
                 mapManager.playerMoveRight();
                 inpManager.keyHandled(3);
             }
             else if(pressedKeys[2]==true){
                 mapManager.playerMoveLeft();
                 inpManager.keyHandled(2);
-            }
+            }*/
             else if(pressedKeys[4]==true){
                 mapManager.playerShoot();
                 inpManager.keyHandled(4);
+            }
+            else if(pressedKeys[5]==true){
+                try {
+                    mapManager.writeMap();
+                } catch (FileNotFoundException ex) {
+                    Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (UnsupportedEncodingException ex) {
+                    Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                inpManager.keyHandled(5);
             }
             if(pressedKeys[6]==true){
                 jframe.remove(gPanel);

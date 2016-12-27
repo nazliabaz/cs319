@@ -23,8 +23,17 @@ public class Column extends MapObject {
     }
     @Override
     public void isDestroyed(){
-            super.setXPos(1199);
+            super.setXPos(599);
             destroyed=true;
+            remainLife=75;
+    }
+    
+    @Override
+    public void decreaseLife(int amount){
+        remainLife-=amount;
+        if(remainLife<=0){
+            isDestroyed();
+        }
     }
     
     /**

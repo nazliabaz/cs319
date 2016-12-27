@@ -39,7 +39,7 @@ public class MapObject {
      }
      
      public void setYPos(int y){
-         objLocation.setX(y);
+         objLocation.setY(y);
      }
      
      
@@ -50,5 +50,12 @@ public class MapObject {
     public boolean getDestroyedState(){
         return false;
     }
+    
+    
+    public void decreaseLife(int amount){
+        
+    }
+    
+    
      
 }
