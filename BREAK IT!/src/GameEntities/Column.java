@@ -15,10 +15,16 @@ public class Column extends MapObject {
     private int remainLife;
     private boolean destroyed;
     
-    public Column(int x,int y){
+    public Column(int x,int y,int colType){
         super(x,y);
-        type=ColumnType.WOODEN;
-        remainLife=75;
+        if(colType<1){
+            type=ColumnType.WOODEN;
+            remainLife=75;
+        }
+        else{
+            type=ColumnType.STONE;
+            remainLife=150;
+        }
         destroyed=false;
     }
     @Override
@@ -42,5 +48,9 @@ public class Column extends MapObject {
      */
     public boolean getDestroyedState(){
         return destroyed;
+    }
+    
+    public ColumnType getType(){
+        return type;
     }
 }

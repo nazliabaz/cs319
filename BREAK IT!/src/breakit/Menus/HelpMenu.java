@@ -20,10 +20,11 @@ public class HelpMenu extends MainMenu{
         int currentSlide=1;
         int maxSlide=3;
     private final String menuStrings[]={"HELP","Go Back","This is Margaret","This is Abraham",
-        "Press LEFT and RIGHT arrow keys to","scroll through the help.","Show Slide 2 content here","Show Slide 3 content here"};
+        "Press LEFT and RIGHT arrow keys to","scroll through the help.","Use Up & Down Keys To Move","Press Enter to Switch Weapon","Press Space to Fire"};
     
     protected final Image margaret=Toolkit.getDefaultToolkit().getImage("margaret.png");
     protected final Image abraham=Toolkit.getDefaultToolkit().getImage("abraham.png");
+    protected final Image keys=Toolkit.getDefaultToolkit().getImage("keys.png");
     
     @Override
     protected void paintComponent(Graphics g) {
@@ -44,10 +45,12 @@ public class HelpMenu extends MainMenu{
             g.drawImage(abraham, 380, 150, 200, 200, this);
         }
         else if(currentSlide==2){
-            g.drawString(menuStrings[6], 600/2-170, 300);
+            g.drawImage(keys, 155, 150, 250, 200, this);
+            g.drawString(menuStrings[6], 600/2-170, 390);
         }
         else if(currentSlide==3){
             g.drawString(menuStrings[7], 600/2-170, 300);
+            g.drawString(menuStrings[8], 600/2-150, 350);
         }
         
         

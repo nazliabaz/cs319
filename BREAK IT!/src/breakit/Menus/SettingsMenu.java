@@ -38,7 +38,7 @@ public class SettingsMenu extends MainMenu {
         g.drawString(menuStrings[2], 600/2-125, 270);
         g.drawString(menuStrings[3], 600/2-150, 300);
         g.drawString(menuStrings[4], 600/2-110, 330);
-        g.drawString(menuStrings[5], 600/2-85, 385);
+        //g.drawString(menuStrings[5], 600/2-85, 385);
         g.drawString(menuStrings[6], 600/2-125, 445);
         g.drawString(menuStrings[7], 600/2-55, 510);
         
@@ -59,7 +59,7 @@ public class SettingsMenu extends MainMenu {
             g.drawString(menuStrings[4], 600/2-110, 330);
         }
         else if(currentSelection==5){
-            g.drawString(menuStrings[5], 600/2-85, 385);
+           // g.drawString(menuStrings[5], 600/2-85, 385);
         }
         else if(currentSelection==6){
             g.drawString(menuStrings[6], 600/2-125, 445);
@@ -76,7 +76,9 @@ public class SettingsMenu extends MainMenu {
     @Override
     public void selectNext(){
         if(currentSelection<7){
-            
+            if(currentSelection==4){
+                currentSelection++;
+            }
             currentSelection++;
            // System.out.println(currentSelection);
         }
@@ -85,6 +87,9 @@ public class SettingsMenu extends MainMenu {
     @Override
     public void selectPrevious(){
         if(currentSelection>1){
+            if(currentSelection==6){
+                currentSelection--;
+            }
             currentSelection--;
         }
     }

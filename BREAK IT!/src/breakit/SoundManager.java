@@ -6,6 +6,11 @@
 
 package breakit;
 
+import java.io.File;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+
 
 
 /**
@@ -14,14 +19,45 @@ package breakit;
  */
 class SoundManager  {
    
-    SoundManager(){
+    private Clip clip;
+    private boolean musicOn=true;
 
+    public SoundManager(){
+        try {
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(
+                    new File("music.wav"));
+            clip = AudioSystem.getClip();
+            
+            clip.open(audioInputStream);
+            
+            clip.start();
+        }
+        catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
+    public void stopMusic(){
+        clip.stop();
+    }
+
+    public void startMusic(){
+        clip.start();
+        musicOn=true;
+    }
+    
+    public void switchState(){
+        if(musicOn==true){
+            stopMusic();
+            musicOn=false;
+        }
+        else{
+            startMusic();
+            musicOn=true;
+        }
     }
     
     
- public void startBGMusic() { //Plays the background music
 
-        }
-    
 
 }

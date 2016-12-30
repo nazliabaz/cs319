@@ -32,7 +32,7 @@ public class StartMenu extends MainMenu {
         g.drawString(menuStrings[0], 600/2-59, 390);
         g.drawString(menuStrings[1], 600/2-93, 425);
         g.drawString(menuStrings[2], 600/2-60, 460);
-        g.drawString(menuStrings[3], 600/2-85, 495);
+        //g.drawString(menuStrings[3], 600/2-85, 495);
         g.drawString(menuStrings[4], 600/2-60, 530);
         
         
@@ -63,6 +63,9 @@ public class StartMenu extends MainMenu {
     @Override
     public void selectNext(){
         if(currentSelection<5){
+            if(currentSelection==3){
+                currentSelection++;
+            }
             currentSelection++;
         }
     }
@@ -70,6 +73,9 @@ public class StartMenu extends MainMenu {
     @Override
     public void selectPrevious(){
         if(currentSelection>1){
+            if(currentSelection==5){
+                currentSelection--;
+            }
             currentSelection--;
         }
     }

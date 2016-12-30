@@ -8,16 +8,20 @@ package GameMapping;
 
 import GameEntities.Bird;
 import GameEntities.Column;
+import GameEntities.ColumnType;
 import GameEntities.Enemy;
 import GameEntities.MapObject;
+import GameEntities.PowerupType;
+import GameEntities.Powerups;
 import GameEntities.Weapons;
+import java.awt.Image;
+import java.awt.Toolkit;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import static java.lang.System.exit;
 import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 
 /**
  *
@@ -34,12 +38,12 @@ public class GameMap {
     
     Random randomGenerator = new Random();
     
-    private int columnPerLevelCount=3;
+    private int columnPerLevelCount=2;
     private int enemyPerLevelCount=3;
     
     
     //private int playerX=14,playerY=599;
-    private final int defaultPlayerX=7,defaultPlayerY=599/2;
+    private final int defaultPlayerX=250,defaultPlayerY=7;
     private final int HEIGHT=600;
     private final int WIDTH=600;
     private int[][] map;
@@ -47,8 +51,19 @@ public class GameMap {
     private int bulletX,bulletY;
     private Weapons bullet;
     private boolean bulletLaunched=false;
-    private Enemy enemy1,enemy2;
-    
+    private Enemy enemy1;
+    private Weapons enemyBullet;
+    private Powerups powerup;
+    private int playerReduceHealthBy=0;
+    private int healthReductionAnimator=0;
+    private int currentLevel=1;
+    private boolean gameWon=false;
+    private int playerIncreaseHealthBy;
+    private int immortalPeriod=0;
+    private int columnType;
+    private int playerBulletType=0;
+    private Image playerBullet;
+    private int playerWeaponPower;
     
     public GameMap(){
         map= new int[WIDTH][HEIGHT];
@@ -58,6 +73,8 @@ public class GameMap {
             }
         }
         
+        playerBullet=Toolkit.getDefaultToolkit().getImage("smallBullet.png");
+        playerWeaponPower=25;
         collider=new CollisionManager();
         
         
@@ -65,7 +82,9 @@ public class GameMap {
         
         int randomInt = randomGenerator.nextInt(100);
         if(column==null && randomInt>25 && randomInt<35 ){
-            column=new Column(599,0);
+            int columnRandom = randomGenerator.nextInt(10);
+            columnType=columnRandom%3;
+            column=new Column(599,0,columnType);
             columnPerLevelCount--;
             
             for(int i=0;i<600;i++){
@@ -78,14 +97,22 @@ public class GameMap {
         
         
         
-        player=new Bird(14,599/2);
+        /*player=new Bird(7,599/2);
         
         
         for(int i=599/2;i<601/2;i++){
             for(int j=7;j<8;j++){
                 map[i][j]=1; //represents player
             }
+        }*/
+        
+        
+        player=new Bird(250,7);
+        for(int i=0;i<60;i++){
+            map[250+i][7]=1;
         }
+
+       
     }
     
     public int[][] obtainMap(){
@@ -93,28 +120,27 @@ public class GameMap {
     }
     
     public int returnPlayerX(){
-        for(int i=0;i<1200/2;i++){
-            if(map[599/2][i]==1){
+        return 7;
+    }
+    
+    public int returnPlayerY(){
+        for(int i=0;i<600;i++){
+            if(map[i][7]==1){
                // playerX=i;
-                player.setXPos(i);
+                player.setYPos(i);
             }
         }
         
         //return playerX;
-        return player.getXPos();
-    }
-    
-    public int returnPlayerY(){
-
-        //return playerY;
         return player.getYPos();
+    
     }
     
 
     
     
     public void playerMoveUp(){
-        if(player.getYPos()>30){
+        /*if(player.getYPos()>30){
             player.setYPos(player.getYPos()-5);
             map[player.getYPos()][14]+=1;
             map[player.getYPos()][15]+=1;
@@ -127,15 +153,39 @@ public class GameMap {
             map[player.getYPos()+5][15]-=1;
 
             System.out.println(player.getYPos());
-        }
+        }*/
         
+        
+        if(player.getXPos()>2){
+            for(int i=0;i<60;i++){
+                map[player.getXPos()+i][7]-=1;
+            }
+            
+            player.setXPos(player.getXPos()-5);
+            
+            for(int i=0;i<60;i++){
+                map[player.getXPos()+i][7]+=1;
+            }
+            
+        }
         
         
     }
     
     public void playerMoveDown(){
-        if(player.getYPos()<550){
-            player.setYPos(player.getYPos()+5);
+        if(player.getXPos()<440){
+            
+            for(int i=0;i<60;i++){
+                map[player.getXPos()+i][7]-=1;
+            }
+            
+            player.setXPos(player.getXPos()+5);
+            
+            for(int i=0;i<60;i++){
+                map[player.getXPos()+i][7]+=1;
+            }
+            
+            /*player.setYPos(player.getYPos()+5);
             map[player.getYPos()][14]+=1;
             map[player.getYPos()][15]+=1;
             map[player.getYPos()+1][14]+=1;
@@ -146,7 +196,7 @@ public class GameMap {
             map[player.getYPos()-5][14]-=1;
             map[player.getYPos()-5][15]-=1;
 
-            System.out.println(player.getYPos());
+            System.out.println(player.getYPos());*/
         }
     }
     
@@ -161,23 +211,29 @@ public class GameMap {
             }
         }
         
-        for(int i=599/2;i<601/2;i++){
-            for(int j=14/2;j<17/2;j++){
-                map[i][j]=1; //represents player
-            }
+        for(int i=0;i<60;i++){
+            map[250+i][7]=1;
         }
         column=null;
-        columnPerLevelCount=3;
+        columnPerLevelCount=2;
         enemyPerLevelCount=3;
+        enemy1=null;
+        powerup=null;
+        currentLevel=1;
+        gameWon=false;
+        immortalPeriod=0;
+
     }
 
     public void update() {
 
-        int randomInt = randomGenerator.nextInt(400);
+        int randomInt = randomGenerator.nextInt(300);
         int bulletSpeed=4;
         
         if(column==null && randomInt>22 && randomInt<24 && columnPerLevelCount>0 ){
-            column=new Column(599,0);
+            int columnRandom = randomGenerator.nextInt(10);
+            columnType=columnRandom%3;
+            column=new Column(599,0,columnType);
             columnPerLevelCount--;
             
             for(int i=0;i<600;i++){
@@ -205,51 +261,64 @@ public class GameMap {
                 
         }
         
-        if(randomInt==92 && (enemy1==null || enemy2==null) && enemyPerLevelCount>0){
-            int randomIntForPosition = randomGenerator.nextInt(500)+25;
+        if(randomInt==92  && (enemy1==null) && enemyPerLevelCount>0){
+            int randomIntForPosition = randomGenerator.nextInt(450)+25;
+            int randomIntForType = randomGenerator.nextInt(10);
             if(enemy1==null){
-                enemy1=new Enemy(randomIntForPosition,598);
+                enemy1=new Enemy(randomIntForPosition,568,randomIntForType%3);
                 enemyPerLevelCount--;
-                
-                map[randomIntForPosition][598]+=9;
-                map[randomIntForPosition][599]+=9;
-                map[randomIntForPosition-1][598]+=9;
-                map[randomIntForPosition-1][599]+=9;
+                for(int i=randomIntForPosition;i<randomIntForPosition+30;i++){
+                    for(int j=0;j<2;j++){
+                        map[i][568+j]+=9;
+                    }
+                }
                 System.out.println("Enemy created");
             }
         }
-        else if(enemy1!= null || enemy2!= null){
-            if(enemy1!=null){
+        else if(enemy1!= null ){
+            
                 int enemCurrX=enemy1.getXPos();
                 int enemCurrY=enemy1.getYPos();
-                if(enemCurrY>5){
-                    map[enemCurrX][enemCurrY-1]-=9;
-                    map[enemCurrX][enemCurrY]-=9;
-                    map[enemCurrX-1][enemCurrY-1]-=9;
-                    map[enemCurrX-1][enemCurrY]-=9;
+                if(enemCurrY>2){
 
+                    for(int i=enemCurrX;i<enemCurrX+30;i++){
+                        for(int j=enemCurrY;j<enemCurrY+2;j++){
+                            map[i][j]-=9;
+                        }
+                    }
                     enemy1.setYPos(enemy1.getYPos()-1);
-
-                    map[enemCurrX][enemCurrY-1]+=9;
-                    map[enemCurrX][enemCurrY]+=9;
-                    map[enemCurrX-1][enemCurrY-1]+=9;
-                    map[enemCurrX-1][enemCurrY]+=9;
+                    enemCurrY=enemy1.getYPos();
+                    for(int i=enemCurrX;i<enemCurrX+30;i++){
+                        for(int j=enemCurrY;j<enemCurrY+2;j++){
+                            map[i][j]+=9;
+                        }
+                    }
+                    
+                    int randomInteger = randomGenerator.nextInt(200);
+                    if(enemyBullet==null && randomInteger<75 && enemy1.getYPos()>50){
+                        enemyBullet=new Weapons(enemy1.getXPos(),enemy1.getYPos());
+                        int enemBullX=enemyBullet.getXPos();
+                        int enemBullY=enemyBullet.getYPos();
+                        map[enemBullX][enemBullY]+=25; // 25 for enemy bullet
+                        map[enemBullX][enemBullY-1]+=25;
+                        map[enemBullX][enemBullY-2]+=25;
+                        map[enemBullX][enemBullY-3]+=25;
+                        map[enemBullX][enemBullY-4]+=25;
+                        
+                    }
+                    
+                    
+                    
                 }
                 else{
-                    map[enemCurrX][enemCurrY-1]-=9;
-                    map[enemCurrX][enemCurrY]-=9;
-                    map[enemCurrX-1][enemCurrY-1]-=9;
-                    map[enemCurrX-1][enemCurrY]-=9;
+
                     enemy1=null;
                     
                 }
+
                 
                 
-                
-                //System.out.println("Enemy created");
-                
-                
-            }
+            
         }
         
         if(bullet!=null){
@@ -259,19 +328,20 @@ public class GameMap {
                     int bulletYCurrent=bullet.getYPos();
                     
 
-                    map[bullet.getXPos()][bullet.getYPos()]-=3;
-                    map[bullet.getXPos()][bullet.getYPos()-1]-=3;
-                    map[bullet.getXPos()][bullet.getYPos()-2]-=3;
-                    map[bullet.getXPos()][bullet.getYPos()-3]-=3;
-                    map[bullet.getXPos()][bullet.getYPos()-4]-=3;
+                    map[bulletXCurrent][bulletYCurrent]-=3;
+                    map[bulletXCurrent][bulletYCurrent-1]-=3;
+                    map[bulletXCurrent][bulletYCurrent-2]-=3;
+                    map[bulletXCurrent][bulletYCurrent-3]-=3;
+                    map[bulletXCurrent][bulletYCurrent-4]-=3;
  
                     bullet.setYPos(bullet.getYPos()+bulletSpeed);
+                    bulletYCurrent=bullet.getYPos();
                     
-                    map[bullet.getXPos()][bullet.getYPos()]+=3;
-                    map[bullet.getXPos()][bullet.getYPos()-1]+=3;
-                    map[bullet.getXPos()][bullet.getYPos()-2]+=3;
-                    map[bullet.getXPos()][bullet.getYPos()-3]+=3;
-                    map[bullet.getXPos()][bullet.getYPos()-4]+=3;
+                    map[bulletXCurrent][bulletYCurrent]+=3;
+                    map[bulletXCurrent][bulletYCurrent-1]+=3;
+                    map[bulletXCurrent][bulletYCurrent-2]+=3;
+                    map[bulletXCurrent][bulletYCurrent-3]+=3;
+                    map[bulletXCurrent][bulletYCurrent-4]+=3;
 
                     
                           
@@ -279,21 +349,108 @@ public class GameMap {
                 }
                 else{
                     bulletLaunched=false;
+                    for(int i=0;i<600;i++){
+                        for(int j=585;j<600;j++){
+                            if(map[i][j]==3){
+                                map[i][j]-=3;
+                            }
+                        }
+                    }
+                    
                 }
             
             
             }
         }
         
+        
+        
+        if(enemyBullet!=null){
+            if(enemyBullet.getYPos()>7){
+                    int enemBullX=enemyBullet.getXPos();
+                    int enemBullY=enemyBullet.getYPos();
+                    
+                    map[enemBullX][enemBullY]-=25; // 25 for enemy bullet
+                    map[enemBullX][enemBullY-1]-=25;
+                    map[enemBullX][enemBullY-2]-=25;
+                    map[enemBullX][enemBullY-3]-=25;
+                    map[enemBullX][enemBullY-4]-=25;
+                    
+                    enemyBullet.setYPos(enemyBullet.getYPos()-bulletSpeed);
+                    enemBullY=enemyBullet.getYPos();
+                    
+                    map[enemBullX][enemBullY]+=25; // 25 for enemy bullet
+                    map[enemBullX][enemBullY-1]+=25;
+                    map[enemBullX][enemBullY-2]+=25;
+                    map[enemBullX][enemBullY-3]+=25;
+                    map[enemBullX][enemBullY-4]+=25;
+            }
+            else{
+                enemyBullet=null;
+                    for(int i=0;i<600;i++){
+                        for(int j=0;j<20;j++){
+                            if(map[i][j]==25){
+                                map[i][j]-=25;
+                            }
+                        }
+                    }
+            }
+                    
+        }
+        
+        
+        int randomPowerUpInt = randomGenerator.nextInt(3000);
+        if(powerup==null && randomPowerUpInt==2555 || randomPowerUpInt==2666 || randomPowerUpInt==2667 || randomPowerUpInt==2668){
+            int randomIntForPositionX = randomGenerator.nextInt(400)+100;
+            int randomIntForPositionY = randomGenerator.nextInt(400)+150;
+            int randomIntForType = randomGenerator.nextInt(3)+1;
+            powerup=new Powerups(randomIntForPositionX,randomIntForPositionY,randomIntForType);
+                    for(int i=0;i<20;i++){
+                        for(int j=0;j<4;j++){
+                            map[randomIntForPositionX+i][randomIntForPositionY+j]+=50;
+                        }
+                    }
+            
+        }
+        else if(powerup!=null){
+            if(powerup.getType()==PowerupType.MUSHROOM || powerup.getType()==PowerupType.IMMORTALITY){
+                powerup.reduceDisappearTime();
+                System.out.println("Disappear time="+powerup.getDisappearTime());
+                if(powerup.getDisappearTime()<=0){
+                    powerup=null;
+                }
+            }
+        }
+        
+        
+        
+        
+        
+        
+        
       //  for(int i=0;i<1200;i++){
       //      f
       //  }
+        
+        
+        
+        if(immortalPeriod>0){
+            immortalPeriod--;
+            System.out.println("Immortality left="+immortalPeriod);
+        }
+        
+        
+        
+        
+        
+        
+        
 
         
       collisionCheck();
         
         
-        
+        levelLogicHandler();
         
     }
     
@@ -320,6 +477,16 @@ public class GameMap {
 
         //return playerY;
         return column.getYPos();
+    }
+    
+    public int returnColumnType(){
+       if(columnType<1){
+           return 0;
+       }
+       else{
+           return 1;
+       }
+        
     }
     
     public int returnBulletX(){
@@ -359,6 +526,66 @@ public class GameMap {
         }
     }
     
+        public Image returnEnemyImage(){
+        if(enemy1!=null){
+            return enemy1.getImage();
+        }
+        else{
+            return null;
+        }
+    }
+    
+    
+    
+    
+    
+    public int returnEnemyBulletX(){
+        if(enemyBullet!=null){
+            return enemyBullet.getYPos()-30;
+        }
+        else{
+            return 0;
+        }
+    }
+    
+    public int returnEnemyBulletY(){
+        if(enemyBullet!=null){
+            return enemyBullet.getXPos();
+        }
+        else{
+            return 0;
+        }
+    }
+    
+    
+    
+    public int returnPowerupX(){
+        if(powerup!=null){
+            return powerup.getYPos()-30;
+        }
+        else{
+            return 0;
+        }
+    }
+    
+    public int returnPowerupY(){
+        if(powerup!=null){
+            return powerup.getXPos();
+        }
+        else{
+            return 0;
+        }
+    }
+    
+    public Image returnPowerupImage(){
+        if(powerup!=null){
+            return powerup.getImage();
+        }
+        else{
+            return null;
+        }
+    }
+    
     
     
     
@@ -366,15 +593,18 @@ public class GameMap {
     private void collisionCheck(){
         int collisionValue=collider.checkForCollision(map);
         if(collisionValue==1){//collision with columns detected
-            //change player's health to 0 or game over
-            gameStop=true;
+            if(immortalPeriod<=0){
+                gameStop=true;
+            }
             
         }
         else if(collisionValue==2){
             System.out.println("Bullet Collided with COlumn");
-            column.decreaseLife(25);
+            if(column!=null)
+                column.decreaseLife(playerWeaponPower);
             bulletLaunched=false;
             //bullet=null;
+            if(column!=null)
             if(column.getDestroyedState()==true){
                 column=null;
                 int index=0;
@@ -393,15 +623,114 @@ public class GameMap {
                 
                 System.out.println(columnPerLevelCount);
                 
+                
             }
         }
+        else if(collisionValue==3){//bullet collides with enemy
+            enemy1.decreaseLife(playerWeaponPower);
+            
+            
+            if(enemy1.getDestroyedState()==true){
+                int enemX=enemy1.getXPos();
+                int enemY=enemy1.getYPos();
+                
+                enemy1=null;
+                //System.out.println("enemX= "+enemX+" enemY="+enemY);
+                    for(int i= enemX;i< enemX+30;i++){
+                        for(int j=enemY;j<enemY+2;j++){
+                            map[i][j]-=9;
+                        }
+                    }
+                
+                
+                
+            }
+                
+
+            
+        }
+        else if(collisionValue==4){//collision of player with enemy
+            if(immortalPeriod<=0){
+                if(enemy1!=null)
+                    playerReduceHealthBy=enemy1.returnAttackPower();
+                else{
+                    playerReduceHealthBy=25;
+                }
+                healthReductionAnimator=0;
+            }
+        }
+        else if(collisionValue==5){//collision of player with enemy bullet
+            if(immortalPeriod<=0){
+                if(enemy1!=null)
+                    playerReduceHealthBy=enemy1.returnAttackPower();
+                else{
+                    playerReduceHealthBy=25;
+                }
+                healthReductionAnimator=0;
+            }
+        }
+        else if(collisionValue==6){//bullet collided with powerup
+            if(powerup!=null){
+                int powerX=powerup.getXPos();
+                int powerY=powerup.getYPos();
+
+                        for(int i=0;i<20;i++){
+                            for(int j=0;j<4;j++){
+                                map[powerX+i][powerY+j]-=50;
+                            }
+                        }
+
+
+                if(powerup.getType()==PowerupType.MEAL){
+                    playerIncreaseHealthBy=25;
+                }
+                else if(powerup.getType()==PowerupType.MUSHROOM){
+                    playerIncreaseHealthBy=50;
+                }
+                else if(powerup.getType()==PowerupType.IMMORTALITY){
+                    immortalPeriod=300;
+                }
+
+                powerup=null;
+            }
+            
+            
+        }
+        
+        cleanMap();
+    }
+    
+    
+    public void cleanMap(){
+        for(int i=0;i<600;i++){
+            for(int j=0;j<600;j++){
+                if(map[i][j]<0){
+                    map[i][j]=0;
+                }
+                if(enemy1==null){
+                    if(map[i][j]==9){
+                        map[i][j]=0;
+                    }
+                }
+                
+                if(map[i][j]==-3){
+                    map[i][j]=0;
+                }
+                if(bullet==null && map[i][j]==3){
+                    map[i][j]=0;
+                }
+                
+                
+            }
+        }
+        
     }
 
     public void playerShoot() {
         
 
         if(bulletLaunched==false){
-            bullet=new Weapons(player.getYPos()+10,40);
+            bullet=new Weapons(player.getYPos()+37,40);
             bulletX=bullet.getXPos();
             bulletY=bullet.getYPos();
 
@@ -424,6 +753,10 @@ public class GameMap {
         return gameStop;
     }
     
+    public boolean didPlayerWin(){
+        return gameWon;
+    }
+    
     public void setGameStop(boolean value){
         gameStop=value;
     }
@@ -440,5 +773,74 @@ public class GameMap {
             }
     writer.close();
     }
+    
+    public int reducePlayerHealth(){
+        if(playerReduceHealthBy!=healthReductionAnimator){
+            healthReductionAnimator++;
+            if(healthReductionAnimator==playerReduceHealthBy){
+                return 0;
+            }
+            return 1;
+        }
+        else{
+            playerReduceHealthBy=0;
+            healthReductionAnimator=0;
+            return 0;
+        }
+    }
+    
+    public int increasePlayerHealth(){
+        int temp=playerIncreaseHealthBy;
+        playerIncreaseHealthBy=0;
+        return temp;
+    }
+    
+    
+    
+   public int getLevel(){
+       return currentLevel;
+   }
+   
+   public void levelLogicHandler(){
+       if(columnPerLevelCount==0 && enemyPerLevelCount==0){
+           if(enemy1==null && column==null){
+               int currLevel=currentLevel+1;
+               reinitialize();
+               if(currLevel<=5){
+                    currentLevel=currLevel;
+
+                    enemyPerLevelCount=currLevel*3;
+                    columnPerLevelCount=(int) (currLevel*1.5);
+               }
+               else{
+                   gameWon=true;
+               }
+           }
+       }
+   }
+   
+   
+   public void switchBulletType(){
+       if(playerBulletType==0){
+           playerBulletType=1;
+           playerBullet=Toolkit.getDefaultToolkit().getImage("Shuriken.png");
+           playerWeaponPower=50;
+       }
+       else{
+           playerBulletType=0;
+           playerBullet=Toolkit.getDefaultToolkit().getImage("smallBullet.png");
+           playerWeaponPower=25;
+       }
+   }
+   
+   public Image returnPlayerBullet(){
+       return playerBullet;
+   }
+   
+   
+
+   
+   
+   
     
 }

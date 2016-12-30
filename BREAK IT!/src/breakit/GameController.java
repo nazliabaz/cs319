@@ -48,19 +48,26 @@ public class GameController implements ActionListener {
     private boolean backgroundNight=true;
     protected Image margaret=Toolkit.getDefaultToolkit().getImage("margaret.png");
     private boolean mHairYellow=true;
-    protected final Image abraham=Toolkit.getDefaultToolkit().getImage("abraham.png");
+    protected Image abraham=Toolkit.getDefaultToolkit().getImage("abraham.png");
+    private boolean aGlasses=false;
     protected final Image returnToMenu=Toolkit.getDefaultToolkit().getImage("return.png");
-    protected final Image bullet=Toolkit.getDefaultToolkit().getImage("smallBullet.png");
-    protected final Image cat=Toolkit.getDefaultToolkit().getImage("cat.png");
+    protected Image bullet=Toolkit.getDefaultToolkit().getImage("smallBullet.png");
+    protected final Image enemyBullet=Toolkit.getDefaultToolkit().getImage("enemyBullet.png");
+    protected Image enemy=Toolkit.getDefaultToolkit().getImage("cat.png");
+    protected Image powerup=Toolkit.getDefaultToolkit().getImage("mealPowerup.png");
     
     public int totalLife=200;
     public int remainingLife=200;
+    
+    public boolean isMargaretAlive=true;
+    protected Image playerImage=Toolkit.getDefaultToolkit().getImage("margaret.png");
+    
     
     
     public GameController(){
         inpManager=new InputManager();
         sManager=new SoundManager();
-        sManager.startBGMusic();
+        sManager.startMusic();
         jframe = new JFrame();
         gPanel=new GamePanel();
         menu=new StartMenu();
@@ -93,7 +100,7 @@ public class GameController implements ActionListener {
             //System.out.println("Hello");
 
             g.drawImage(backgroud, 0, 0, WIDTH, HEIGHT, gPanel);
-            if(mapManager.shouldGameStop()==false){
+            if(mapManager.shouldGameStop()==false && mapManager.didPlayerWin()==false){
 
                 
                 
@@ -102,31 +109,59 @@ public class GameController implements ActionListener {
                 int bulletY=mapManager.returnBulletY();
                 //System.out.println(bulletX+"   "+bulletY+" Player X position="+playerX);
                 if(bulletX!=0){
+                    bullet=mapManager.returnPlayerBullet();
                     g.drawImage(bullet, bulletX, bulletY,20,10, gPanel);
                 }
                 
-                //System.out.println("bullet x= "+bulletX);
+                //System.out.println("bullet x= "+bulletX+" y="+bulletY);
+                
+                
+                int enemyBulletX=mapManager.returnEnemyBulletX();
+                int enemyBulletY=mapManager.returnEnemyBulletY()+10;
+                //System.out.println(bulletX+"   "+bulletY+" Player X position="+playerX);
+                if(enemyBulletX!=0){
+                    g.drawImage(enemyBullet, enemyBulletX, enemyBulletY,30,10, gPanel);
+                     
+                }
+                
+                
+                int powerUpX=mapManager.returnPowerupX();
+                int powerUpY=mapManager.returnPowerupY();
+                //System.out.println("Enemy X="+enemy1X+" Y="+enemy1Y);
+                if(powerUpX!=0){
+                    powerup=mapManager.returnPowerupImage();
+                    g.drawImage(powerup, powerUpX, powerUpY,20,20, gPanel);
+                }
+                
                 
                 
                 
                 int playerX=mapManager.returnPlayerX();
-                int playerY=mapManager.returnPlayerY()-30;
-                g.drawImage(margaret, playerX, playerY, 60, 60, gPanel);
+                int playerY=mapManager.returnPlayerY();
+                //System.out.println("X="+playerX+" Y="+playerY);
+                g.drawImage(playerImage, playerX, playerY-30, 60, 60, gPanel);
 
 
                 int columnX=mapManager.returnColumnX();
                 //System.out.println("COlumnx="+columnX);
                 if(columnX!=-5){
-                    g.setColor(Color.red.darker().darker().darker());
+                    int colType=mapManager.returnColumnType();
+                    if(colType==0){
+                        g.setColor(Color.red.darker().darker().darker());
+                    }
+                    else{
+                        g.setColor(Color.gray.darker().darker());
+                    }
                     g.fillRect(columnX-10, 0, 40, 600);                
 
                 }
                 
                 int enemy1X=mapManager.returnEnemy1X();
                 int enemy1Y=mapManager.returnEnemy1Y();
-                
+                //System.out.println("Enemy X="+enemy1X+" Y="+enemy1Y);
                 if(enemy1X!=0){
-                    g.drawImage(cat, enemy1X, enemy1Y,70,30, gPanel);
+                    enemy=mapManager.returnEnemyImage();
+                    g.drawImage(enemy, enemy1X, enemy1Y,70,30, gPanel);
                 }
                 
                 
@@ -144,12 +179,32 @@ public class GameController implements ActionListener {
                 //System.out.println(lifeRatio);
                 g.setColor(Color.green.darker());
                 g.fillRoundRect(160, 15, (int) (260*lifeRatio), 20, 20, 20);
+                
+                g.setColor(Color.white);
+                
+                g.setFont(new Font("Arial",1,20));
+        
+                g.drawString("Level "+mapManager.getLevel(), 300-50, 60);
+                
+                
+                
+            }
+            else if(mapManager.shouldGameStop()==true ){
+                g.setColor(Color.white);
+                g.setFont(new Font("Arial",1,50));
+        
+                g.drawString("Game Over!", 600/2-135, 90);
+                
+                
+                g.setFont(new Font("Arial",1,25));
+        
+                g.drawString("Press ESC to go back to Main Menu.", 600/2-200, 300);
             }
             else{
                 g.setColor(Color.white);
                 g.setFont(new Font("Arial",1,50));
         
-                g.drawString("Game Over!", 600/2-135, 90);
+                g.drawString("You Won!", 600/2-125, 90);
                 
                 
                 g.setFont(new Font("Arial",1,25));
@@ -263,7 +318,7 @@ public class GameController implements ActionListener {
                 System.exit(0);
             }
             if(menuSelection.equals("Disable Sound")){
-                    System.out.println("Do sound=false");
+                    sManager.switchState();
             }
             else if(menuSelection.equals("Switch Margaret's Hair")){
                     System.out.println("Do mHair==0?mHair=1,mHair=0");
@@ -275,9 +330,20 @@ public class GameController implements ActionListener {
                         margaret=Toolkit.getDefaultToolkit().getImage("margaret.png");
                         mHairYellow=true;
                     }
+                    playerImage=margaret;
             }
             else if(menuSelection.equals("Toggle Abraham's Glasses")){
                     System.out.println("Do aGlasses==0?aGlasses=1,aGlasses=0");
+                    if(aGlasses==false){
+                        abraham=Toolkit.getDefaultToolkit().getImage("abraham1.png");
+                        aGlasses=true;
+                    }
+                    else{
+                        abraham=Toolkit.getDefaultToolkit().getImage("abraham.png");
+                        aGlasses=false;
+                    }
+
+                    
             }
             else if(menuSelection.equals("Switch Background")){
                     System.out.println("Do bg==0?bg=1,bg=0");
@@ -377,16 +443,11 @@ public class GameController implements ActionListener {
                 inpManager.keyHandled(4);
             }
             else if(pressedKeys[5]==true){
-                try {
-                    mapManager.writeMap();
-                } catch (FileNotFoundException ex) {
-                    Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (UnsupportedEncodingException ex) {
-                    Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                mapManager.switchBulletType();
                 inpManager.keyHandled(5);
             }
             if(pressedKeys[6]==true){
+                reinitializeGame();
                 jframe.remove(gPanel);
                 
                 menu=new StartMenu();
@@ -403,7 +464,7 @@ public class GameController implements ActionListener {
             }
             
             mapManager.update();
-            
+            modifyPlayerHealth();
             gPanel.repaint();
             
             
@@ -419,7 +480,36 @@ public class GameController implements ActionListener {
     
     public void reinitializeGame(){
         mapManager.reinitialize();
+        remainingLife=200;
+        totalLife=200;
+        isMargaretAlive=true;
+        playerImage=margaret;
 
+    }
+
+    private void modifyPlayerHealth() {
+        remainingLife-=mapManager.reducePlayerHealth();
+
+            remainingLife+=mapManager.increasePlayerHealth();
+            if(remainingLife>200){
+                remainingLife=200;
+            }
+        //System.out.println("Remaining Life is ="+remainingLife);
+        if(remainingLife<=0 && isMargaretAlive==true){
+            playerImage=abraham;
+            isMargaretAlive=false;
+            remainingLife=100;
+            totalLife=100;
+        }
+        else if(remainingLife<=0 && isMargaretAlive==false){
+            mapManager.setGameStop(true);
+        }
+        else if(remainingLife==200 && isMargaretAlive==false){
+            playerImage=margaret;
+            isMargaretAlive=true;
+            remainingLife=200;
+            totalLife=200;
+        }
     }
     
     
