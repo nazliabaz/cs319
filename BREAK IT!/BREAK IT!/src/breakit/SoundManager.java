@@ -6,22 +6,29 @@
 
 package breakit;
 
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 
-
-/**
- *
- * @author Usama Moin
- */
 class SoundManager  {
+    protected Clip clip;
+    protected AudioInputStream audioIn;
    
-    SoundManager(){
-
+    SoundManager()
+    {
+        try {
+            audioIn = AudioSystem.getAudioInputStream(SoundManager.class.getResourceAsStream("Nyan Cat.wav"));
+            clip = AudioSystem.getClip();
+            clip.open(audioIn);
+        }
+        catch (Exception e1) {
+            e1.printStackTrace();
+        }
     }
     
-    
- public void startBGMusic() { //Plays the background music
-
-        }
-    
-
+    public void startBGMusic() 
+    { 
+        clip.start();
+    }//Plays the background music
+   
 }
